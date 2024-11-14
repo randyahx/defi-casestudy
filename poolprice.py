@@ -66,7 +66,34 @@ def get_uniswap_v2_price():
 
 # 1inch Price - ETH/USDC
 def get_1inch_price():
-   return 
+    # Get ETH/USDC pair    
+    params = {
+        "src": WETH_ADDRESS,
+        "dst": USDC_ADDRESS,
+        "amount": Web3.to_wei(TOKEN_AMOUNT, 'ether')
+    }
+    
+    headers = {
+        "Authorization": f"Bearer {ONEINCH_API_KEY}",
+        "Accept": "application/json"
+    }
+    
+    try:
+        response = requests.get(ONEINCH_API_URL, params=params, headers=headers)
+        print(f"1inch API Response Status: {response.status_code}")
+        
+        if response.status_code != 200:
+            print(f"1inch API Response: {response.text}")  
+            raise Exception(f"1inch API Error: Status {response.status_code} - {response.text}")
+            
+        data = response.json()
+        return int(data["toAmount"]) / 10 ** 6  # Convert USDC (6 decimals)
+    except requests.exceptions.RequestException as e:
+        raise Exception(f"1inch API Request Failed: {str(e)}")
+    except ValueError as e:
+        raise Exception(f"1inch API Invalid Response: {str(e)}")
+    except Exception as e:
+        raise Exception(f"1inch API Error: {str(e)}")
 
 # Main  
 try:
